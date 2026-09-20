@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Eye, EyeOff, LogIn, ShieldCheck, ExternalLink, AlertCircle, Zap } from 'lucide-react';
+import { Eye, EyeOff, LogIn, ShieldCheck, ExternalLink, AlertCircle, Zap, GraduationCap, Shield } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useStream } from '../context/StreamContext';
 import PreDashboardLayout from '../components/layout/PreDashboardLayout';
@@ -219,14 +218,44 @@ export default function LoginPage({ onLogin }) {
                   <div className="flex-1 h-px bg-gov-gray-200" />
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleInstantDemoLogin}
-                  className="w-full bg-gov-saffron hover:bg-[#c0622a] text-white font-semibold rounded-gov py-2.5 px-4 text-xs transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
-                >
-                  <Zap size={14} className="fill-white" />
-                  <span>⚡ Instant 1-Click Access (Open Dashboard Directly)</span>
-                </button>
+                <div className="space-y-2">
+                  <button
+                    type="button"
+                    onClick={handleInstantDemoLogin}
+                    className="w-full bg-gov-blue hover:bg-gov-navy text-white font-semibold rounded-gov py-2 px-4 text-xs transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                  >
+                    <Zap size={14} className="fill-white" />
+                    <span>⚡ Instant Access: Employee Portal (Dashboard)</span>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem('ks_is_logged_in', 'true');
+                        localStorage.setItem('ks_active_portal', 'trainer');
+                        navigate('/trainer');
+                      }}
+                      className="bg-gov-saffron hover:bg-[#c0622a] text-white font-semibold rounded-gov py-2 px-3 text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <GraduationCap size={14} />
+                      <span>🎓 Trainer Portal</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem('ks_is_logged_in', 'true');
+                        localStorage.setItem('ks_active_portal', 'admin');
+                        navigate('/admin');
+                      }}
+                      className="bg-gov-green hover:bg-[#1a5b3a] text-white font-semibold rounded-gov py-2 px-3 text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <Shield size={14} />
+                      <span>🛡️ Admin Portal</span>
+                    </button>
+                  </div>
+                </div>
 
                 <button
                   type="button"

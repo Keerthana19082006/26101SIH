@@ -12,9 +12,12 @@ import {
   Sparkles,
   Layers,
   ChevronRight,
-  X
+  X,
+  FileText,
+  Download
 } from 'lucide-react';
 import { useStream } from '../context/StreamContext';
+import { getStoredMaterials } from '../services/portalManagementService';
 
 export default function ExploreLearningPage() {
   const {
@@ -168,6 +171,49 @@ export default function ExploreLearningPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Faculty Department Materials Shelf ─────────────────────────────── */}
+      {(() => {
+        const empDept = employee?.department || 'MoSPI / National Statistical Office';
+        const deptMaterials = getStoredMaterials(empDept);
+        if (deptMaterials.length === 0) return null;
+
+        return (
+          <div className="gov-card p-5 border-l-4 border-l-gov-saffron bg-gradient-to-r from-gov-saffron/5 to-white space-y-3 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText size={18} className="text-gov-saffron" />
+                <h3 className="text-xs font-bold text-gov-navy uppercase tracking-wider">
+                  Faculty & Academy Curated Materials ({deptMaterials.length} Documents for {empDept})
+                </h3>
+              </div>
+              <span className="badge-gov-saffron text-[9px] font-bold">NSSTA Approved</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+              {deptMaterials.map((mat) => (
+                <div key={mat.id} className="p-3.5 bg-white rounded-gov border border-gov-gray-200 hover:border-gov-saffron transition-all space-y-2 shadow-xs">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="badge-gov-info text-[9px]">{mat.competency}</span>
+                    <span className="text-[10px] text-gov-gray-400">{mat.size}</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-gov-navy leading-snug line-clamp-2">{mat.title}</h4>
+                  <p className="text-[11px] text-gov-gray-500 line-clamp-2 leading-relaxed">{mat.description}</p>
+                  <div className="pt-2 border-t border-gov-gray-100 flex items-center justify-between text-[10px]">
+                    <span className="text-gov-gray-400 italic">By {mat.author || 'NSSTA Faculty'}</span>
+                    <button
+                      onClick={() => alert(`Downloading "${mat.title}"...`)}
+                      className="text-gov-blue hover:underline font-bold flex items-center gap-1"
+                    >
+                      <Download size={11} /> Download
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Course Cards Grid ───────────────────────────────────────────────── */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">

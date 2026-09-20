@@ -142,6 +142,24 @@ export default function GovernmentTopNav({ onLogout, onSwitchPortal, onMobileMen
               </select>
             </div>
 
+            {/* Quick Portal Switcher Links */}
+            <div className="hidden md:flex items-center gap-1.5">
+              <Link
+                to="/trainer"
+                className="bg-gov-saffron hover:bg-[#c0622a] text-white px-2.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition-colors shadow-xs"
+                title="Open Trainer & Faculty Portal"
+              >
+                <span>🎓 Trainer Portal</span>
+              </Link>
+              <Link
+                to="/admin"
+                className="bg-gov-green hover:bg-[#1a5b3a] text-white px-2.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 transition-colors shadow-xs"
+                title="Open Administration Portal"
+              >
+                <span>🛡️ Admin Portal</span>
+              </Link>
+            </div>
+
             <div className="flex items-center gap-1.5 bg-white/10 px-2 py-0.5 rounded text-[10px] border border-white/15">
               <span className="w-1.5 h-1.5 rounded-full bg-gov-saffron animate-pulse" />
               <span className="font-semibold text-white">iGOT Karmayogi Integrated</span>

@@ -140,6 +140,8 @@ function AppRoutes() {
   };
 
   const handlePortalSelect = (portalId) => {
+    setIsLoggedIn(true);
+    localStorage.setItem('ks_is_logged_in', 'true');
     if (portalId === 'employee') {
       setActivePortal('employee_selection');
       localStorage.setItem('ks_active_portal', 'employee_selection');
@@ -216,42 +218,30 @@ function AppRoutes() {
       <Route
         path="/portal"
         element={
-          !isLoggedIn ? (
-            <Navigate to="/" replace />
-          ) : (
-            <PortalSelectionPage
-              onSelectPortal={handlePortalSelect}
-              onLogout={handleLogout}
-            />
-          )
+          <PortalSelectionPage
+            onSelectPortal={handlePortalSelect}
+            onLogout={handleLogout}
+          />
         }
       />
 
-      {/* ── 3. TRAINER WORKSPACE ─────────────────────────────────────────── */}
+      {/* ── 3. TRAINER WORKSPACE (DIRECT ACCESS SUPPORTED) ────────────────── */}
       <Route
         path="/trainer"
         element={
-          !isLoggedIn ? (
-            <Navigate to="/" replace />
-          ) : (
-            <TrainerPortalView
-              onBackToPortals={handleBackToPortals}
-            />
-          )
+          <TrainerPortalView
+            onBackToPortals={handleBackToPortals}
+          />
         }
       />
 
-      {/* ── 4. ADMINISTRATION WORKSPACE ──────────────────────────────────── */}
+      {/* ── 4. ADMINISTRATION WORKSPACE (DIRECT ACCESS SUPPORTED) ─────────── */}
       <Route
         path="/admin"
         element={
-          !isLoggedIn ? (
-            <Navigate to="/" replace />
-          ) : (
-            <AdminPortalView
-              onBackToPortals={handleBackToPortals}
-            />
-          )
+          <AdminPortalView
+            onBackToPortals={handleBackToPortals}
+          />
         }
       />
 

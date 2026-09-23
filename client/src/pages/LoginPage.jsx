@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn, ShieldCheck, ExternalLink, AlertCircle, Zap, GraduationCap, Shield } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useStream } from '../context/StreamContext';

@@ -22,6 +22,7 @@ import {
   generateContextualAIReply
 } from '../services/domainConfigEngine';
 import { getVirtualLabById } from '../data/departmentVirtualLabs';
+import { assessmentAPI, assistantAPI } from '../services/api';
 
 const StreamContext = createContext(null);
 export const EmployeeContext = StreamContext; // Alias for Phase 4 architecture
@@ -250,6 +251,12 @@ export function StreamProvider({ children }) {
       localStorage.setItem(`ks_recommendations_${employee.id}`, JSON.stringify(evalResult.recommendedCourses));
       localStorage.setItem(`ks_learning_path_${employee.id}`, JSON.stringify(evalResult.learningPath));
 
+      // Asynchronously submit to PostgreSQL backend
+      const backendAttemptId = localStorage.getItem('ks_backend_attempt_id');
+      if (backendAttemptId) {
+        assessmentAPI.submitAssessment(backendAttemptId, answers).catch(() => {});
+      }
+
       // Also update employee overall score & critical gaps count in state
       const updatedEmp = {
         ...employee,
@@ -328,6 +335,17 @@ export function StreamProvider({ children }) {
         status: 'IN_PROGRESS',
       });
       localStorage.setItem(historyKey, JSON.stringify(history));
+      
+      // Async notify PostgreSQL backend to record new attempt
+      assessmentAPI.startDiagnostic(employeeId)
+        .then(res => {
+          if (res?.data?.attemptId) {
+            localStorage.setItem('ks_backend_attempt_id', res.data.attemptId);
+          }
+        })
+        .catch(() => {
+          // Graceful fallback to client session attempt if backend offline
+        });
     } catch (e) {
       // safe fallback
     }
@@ -536,7 +554,7 @@ export function StreamProvider({ children }) {
   const domainNotifications = getContextualNotifications(empId);
   const suggestedAIQuestions = getSuggestedQuestions(empId, gapAnalysis);
 
-  // AI Assistant Chat Message (Strictly Department Grounded)
+  // AI Assistant Chat Message (Strictly Department Grounded & Backend Connected)
   const sendAIMessage = (userText, currentCourse) => {
     const userMsg = {
       id: `usr-${Date.now()}`,
@@ -546,23 +564,42 @@ export function StreamProvider({ children }) {
     };
     setAssistantMessages(prev => [...prev, userMsg]);
 
-    setTimeout(() => {
-      const { text, actions } = generateContextualAIReply(
-        userText,
-        employee || { name: 'Officer', designation: roleConfig.title, id: empId },
-        gapAnalysis,
-        currentCourse
-      );
-
-      const botMsg = {
-        id: `ai-${Date.now()}`,
-        sender: 'ai',
-        text,
-        actions,
-        timestamp: 'Just now',
-      };
-      setAssistantMessages(prev => [...prev, botMsg]);
-    }, 400);
+    assistantAPI.chat({ message: userText, employeeId: empId })
+      .then(res => {
+        if (res?.data?.reply) {
+          setAssistantMessages(prev => [
+            ...prev,
+            {
+              id: `ai-${Date.now()}`,
+              sender: 'ai',
+              text: res.data.reply,
+              actions: res.data.suggestedActions || [],
+              provenance: res.data.provenance || [],
+              timestamp: 'Just now',
+            }
+          ]);
+          return;
+        }
+        throw new Error('Fallback to local');
+      })
+      .catch(() => {
+        const { text, actions } = generateContextualAIReply(
+          userText,
+          employee || { name: 'Officer', designation: roleConfig.title, id: empId },
+          gapAnalysis,
+          currentCourse
+        );
+        setAssistantMessages(prev => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: 'ai',
+            text,
+            actions,
+            timestamp: 'Just now',
+          }
+        ]);
+      });
   };
 
   const currentRole = STREAM_ROLES[selectedStream?.id || 'stats'] || STREAM_ROLES.stats;

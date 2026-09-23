@@ -3,14 +3,14 @@ setlocal enabledelayedexpansion
 
 echo ========================================================
 echo   Pushing KarmaSiksha Project to GitHub Repository
-echo   Repo: https://github.com/upoornalakshminarayana-commits/mine.git
+echo   Repo: https://github.com/upoornalakshminarayana-commits/sihprototype.git
 echo ========================================================
 echo.
 
 cd /d "%~dp0"
 
 echo [1/5] Configuring remote URL and Git identity...
-git remote set-url origin https://github.com/upoornalakshminarayana-commits/mine.git
+git remote set-url origin https://github.com/upoornalakshminarayana-commits/sihprototype.git
 git config user.name "upoornalakshminarayana-commits"
 git config user.email "upoornalakshminarayana@gmail.com"
 
@@ -22,7 +22,7 @@ echo [3/5] Staging all files...
 git add -A
 
 echo [4/5] Creating commit...
-git commit -m "KarmaSiksha portal complete codebase with static headers and compact AI assistant"
+git commit -m "KarmaSiksha complete platform with Groq AI competency assessment integration"
 
 echo [5/5] Setting primary branch to main and pushing to GitHub...
 git branch -M main
@@ -31,7 +31,7 @@ git push -u origin main --force
 if %ERRORLEVEL% equ 0 (
     echo.
     echo ========================================================
-    echo   SUCCESS: Project pushed to https://github.com/upoornalakshminarayana-commits/mine
+    echo   SUCCESS: Project pushed to https://github.com/upoornalakshminarayana-commits/sihprototype
     echo ========================================================
 ) else (
     echo.
@@ -41,5 +41,4 @@ if %ERRORLEVEL% equ 0 (
     echo ========================================================
 )
 
-echo.
 pause

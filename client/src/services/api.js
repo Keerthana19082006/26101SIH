@@ -36,116 +36,119 @@ export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
-  saveOnboardingStep: (step, data) => api.put('/auth/onboarding', { step, data }),
-  completeOnboarding: () => api.post('/auth/onboarding/complete'),
 };
 
-// ─── USERS ─────────────────────────────────────────────────────────────────────
-export const usersAPI = {
-  getAll: (params) => api.get('/users', { params }),
-  getById: (id) => api.get(`/users/${id}`),
-  update: (id, data) => api.put(`/users/${id}`, data),
-  updateStatus: (id, status) => api.patch(`/users/${id}/status`, { status }),
-  getMyProfile: () => api.get('/users/me/profile'),
-  updateMyProfile: (data) => api.put('/users/me/profile', data),
-  getDashboard: () => api.get('/users/me/dashboard'),
+// ─── EMPLOYEES ────────────────────────────────────────────────────────────────
+export const employeesAPI = {
+  getDemoEmployees: () => api.get('/employees/demo'),
+  getById: (id) => api.get(`/employees/${id}`),
+  getDashboard: (id) => api.get(`/employees/${id}/dashboard`),
+  getAll: (params) => api.get('/employees/demo', { params }),
 };
 
-// ─── COMPETENCY FRAMEWORK ────────────────────────────────────────────────────
-export const frameworkAPI = {
-  getTree: () => api.get('/framework/tree'),
-  getDomains: () => api.get('/framework/domains'),
-  createDomain: (data) => api.post('/framework/domains', data),
-  updateDomain: (id, data) => api.put(`/framework/domains/${id}`, data),
-  deleteDomain: (id) => api.delete(`/framework/domains/${id}`),
-  getCompetencies: (params) => api.get('/framework/competencies', { params }),
-  createCompetency: (data) => api.post('/framework/competencies', data),
-  updateCompetency: (id, data) => api.put(`/framework/competencies/${id}`, data),
-  getSkills: (params) => api.get('/framework/skills', { params }),
-  createSkill: (data) => api.post('/framework/skills', data),
-  updateSkill: (id, data) => api.put(`/framework/skills/${id}`, data),
-  getTopics: (params) => api.get('/framework/topics', { params }),
-  createTopic: (data) => api.post('/framework/topics', data),
-  getRoles: () => api.get('/framework/roles'),
-  createRole: (data) => api.post('/framework/roles', data),
-  updateRole: (id, data) => api.put(`/framework/roles/${id}`, data),
-};
-
-// ─── ASSESSMENTS ──────────────────────────────────────────────────────────────
+// ─── ASSESSMENTS & ADAPTIVE QUIZ ──────────────────────────────────────────────
 export const assessmentAPI = {
-  getAll: (params) => api.get('/assessments', { params }),
-  getById: (id) => api.get(`/assessments/${id}`),
-  create: (data) => api.post('/assessments', data),
-  update: (id, data) => api.put(`/assessments/${id}`, data),
-  startAttempt: (assessmentId) => api.post(`/assessments/${assessmentId}/attempt`),
-  submitAttempt: (assessmentId, attemptId, answers) => api.post(`/assessments/${assessmentId}/attempt/${attemptId}/submit`, { answers }),
+  // CRITICAL RULE: Starts fresh diagnostic attempt in PostgreSQL on every Enter Employee click
+  startDiagnostic: (employeeId) => api.post('/assessments/start-diagnostic', { employeeId }),
+  submitAnswer: (attemptId, questionId, selectedOptionId, responseTimeSeconds = 0) =>
+    api.post(`/assessments/${attemptId}/answer`, { questionId, selectedOptionId, responseTimeSeconds }),
+  submitAssessment: (attemptId, answers) =>
+    api.post(`/assessments/${attemptId}/submit`, { answers }),
   getResult: (attemptId) => api.get(`/assessments/results/${attemptId}`),
+  getAll: (params) => api.get('/assessments', { params }),
 };
 
-// ─── QUIZZES ──────────────────────────────────────────────────────────────────
-export const quizAPI = {
-  getAll: (params) => api.get('/quizzes', { params }),
-  getById: (id) => api.get(`/quizzes/${id}`),
-  create: (data) => api.post('/quizzes', data),
-  update: (id, data) => api.put(`/quizzes/${id}`, data),
-  start: (id) => api.post(`/quizzes/${id}/start`),
-  submit: (id, data) => api.post(`/quizzes/${id}/submit`, data),
+// ─── COMPETENCIES & GAPS ──────────────────────────────────────────────────────
+export const competenciesAPI = {
+  getByEmployee: (employeeId) => api.get(`/competencies/employee/${employeeId}`),
+  getSkillGaps: (employeeId) => api.get(`/competencies/gaps/${employeeId}`),
 };
 
 // ─── COURSES ──────────────────────────────────────────────────────────────────
 export const courseAPI = {
   getAll: (params) => api.get('/courses', { params }),
   getById: (id) => api.get(`/courses/${id}`),
-  create: (data) => api.post('/courses', data),
-  update: (id, data) => api.put(`/courses/${id}`, data),
-  enroll: (id) => api.post(`/courses/${id}/enroll`),
-  updateProgress: (id, data) => api.put(`/courses/${id}/progress`, data),
-  getMyProgress: () => api.get('/courses/me/progress'),
+  enroll: (id, employeeId) => api.post(`/courses/${id}/enroll`, null, { params: { employee_id: employeeId } }),
 };
 
-// ─── DOCUMENTS ────────────────────────────────────────────────────────────────
+// ─── LEARNING PATHS & RECOMMENDATIONS ─────────────────────────────────────────
+export const learningPathsAPI = {
+  getRecommendations: (employeeId) => api.get(`/learning-paths/recommendations/${employeeId}`),
+  getEmployeePath: (employeeId) => api.get(`/learning-paths/employee/${employeeId}`),
+  refresh: (employeeId) => api.post(`/learning-paths/employee/${employeeId}/refresh`),
+};
+
+// ─── VIRTUAL LABS ─────────────────────────────────────────────────────────────
+export const labsAPI = {
+  getAll: () => api.get('/labs'),
+  getById: (id) => api.get(`/labs/${id}`),
+  submit: (id, employeeId, answers, telemetry = {}) =>
+    api.post(`/labs/${id}/submit`, { employeeId, answers, telemetry }),
+};
+
+// ─── DIGITAL PASSPORT ─────────────────────────────────────────────────────────
+export const passportAPI = {
+  getByEmployee: (employeeId) => api.get(`/passport/${employeeId}`),
+};
+
+// ─── LEARNING STREAK ──────────────────────────────────────────────────────────
+export const streakAPI = {
+  getByEmployee: (employeeId) => api.get(`/streak/${employeeId}`),
+};
+
+// ─── LEADERBOARD ──────────────────────────────────────────────────────────────
+export const leaderboardAPI = {
+  getAll: (params) => api.get('/leaderboard', { params }),
+};
+
+// ─── FUTURE ROLE SIMULATOR ────────────────────────────────────────────────────
+export const futureRolesAPI = {
+  simulate: (data) => api.post('/future-roles/simulate', data),
+};
+
+// ─── DOCUMENTS & RAG ──────────────────────────────────────────────────────────
 export const documentAPI = {
   upload: (formData) => api.post('/documents/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getAll: (params) => api.get('/documents', { params }),
-  getById: (id) => api.get(`/documents/${id}`),
-  generateQuestions: (id, config) => api.post(`/documents/${id}/generate-questions`, config),
 };
 
-// ─── QUESTIONS ────────────────────────────────────────────────────────────────
-export const questionAPI = {
-  getAll: (params) => api.get('/questions', { params }),
-  getById: (id) => api.get(`/questions/${id}`),
-  create: (data) => api.post('/questions', data),
-  update: (id, data) => api.put(`/questions/${id}`, data),
-  updateStatus: (id, status, reason) => api.patch(`/questions/${id}/status`, { status, rejectionReason: reason }),
-  bulkUpdateStatus: (questionIds, status) => api.post('/questions/bulk/status', { questionIds, status }),
-  getStats: () => api.get('/questions/stats'),
+// ─── AI MCQ GENERATOR & REVIEW ────────────────────────────────────────────────
+export const mcqsAPI = {
+  generate: (config) => api.post('/mcqs/generate', config),
+  getAll: (params) => api.get('/mcqs', { params }),
+  updateStatus: (id, status, feedback) => api.patch(`/mcqs/${id}/status`, { status, feedback }),
 };
 
-// ─── LEARNING (Gaps & Recommendations) ───────────────────────────────────────
-export const learningAPI = {
-  getMyGaps: () => api.get('/learning/gaps'),
-  analyzeGaps: (data) => api.post('/learning/gaps/analyze', data),
-  getMyRecommendations: (params) => api.get('/learning/recommendations', { params }),
-  generateRecommendations: () => api.post('/learning/recommendations/generate'),
-  updateRecommendationStatus: (id, status) => api.patch(`/learning/recommendations/${id}/status`, { status }),
+// ─── COMMUNITY DISCUSSIONS ────────────────────────────────────────────────────
+export const communityAPI = {
+  getDiscussions: (params) => api.get('/community/discussions', { params }),
+  createDiscussion: (data) => api.post('/community/discussions', data),
+  reply: (id, data) => api.post(`/community/discussions/${id}/reply`, data),
 };
 
-// ─── ANALYTICS ────────────────────────────────────────────────────────────────
-export const analyticsAPI = {
-  getOverview: () => api.get('/overview'),
-  getDepartments: () => api.get('/departments'),
-  getSkillGaps: () => api.get('/skill-gaps'),
+// ─── WORKFORCE INTELLIGENCE (ADMIN) ───────────────────────────────────────────
+export const workforceAPI = {
+  getAnalytics: () => api.get('/workforce/analytics'),
+};
+
+// ─── AI LEARNING ASSISTANT ────────────────────────────────────────────────────
+export const assistantAPI = {
+  chat: (data) => api.post('/assistant/chat', data),
 };
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
 export const notificationAPI = {
   getAll: () => api.get('/notifications'),
   markRead: (id) => api.patch(`/notifications/${id}/read`),
-  markAllRead: () => api.patch('/notifications/read-all'),
 };
 
-// ─── SEARCH ───────────────────────────────────────────────────────────────────
-export const searchAPI = {
-  search: (q) => api.get('/search', { params: { q } }),
+// ─── INTEGRATIONS ─────────────────────────────────────────────────────────────
+export const integrationsAPI = {
+  getIgotStatus: () => api.get('/integrations/igot/status'),
 };
+
+// ─── GROQ AI INTEGRATION ──────────────────────────────────────────────────────
+export const aiAPI = {
+  generateAssessment: (payload) => api.post('/ai/generate-assessment', payload),
+};
+

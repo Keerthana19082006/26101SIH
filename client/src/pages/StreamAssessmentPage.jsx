@@ -28,6 +28,7 @@ import { useStream } from '../context/StreamContext';
 import { STREAM_QUESTIONS, STREAM_ROLES } from '../data/streamData';
 import { ROLE_BLUEPRINTS } from '../data/roleBlueprints';
 import { generateEmployeeAssessment, getAdaptiveNextQuestion } from '../services/roleAssessmentEngine';
+import { aiAPI } from '../services/api';
 import PreDashboardLayout from '../components/layout/PreDashboardLayout';
 
 const fadeUp = {
@@ -48,6 +49,12 @@ export default function StreamAssessmentPage({ onBackToStreams, onComplete }) {
   const empId = employee?.id || 'demo-employee-01';
   const isRoleAware = Boolean(ROLE_BLUEPRINTS[empId]);
   const roleBlueprint = ROLE_BLUEPRINTS[empId] || null;
+
+  const roleTitleDisplay = roleBlueprint?.roleTitle || employee?.designation || 'Statistical Investigator';
+  const deptDisplay = roleBlueprint?.departmentName || employee?.department || 'MoSPI / National Statistical Office';
+  const blueprintCompetencies = roleBlueprint?.competencies?.map(c => c.name) || employee?.competenciesFocus || [
+    'Survey Sampling', 'Statistical Methods', 'Data Analysis', 'Survey Operations', 'Data Quality'
+  ];
 
   // Initialize role session questions or legacy stream questions
   const [assessmentSession] = useState(() => {
@@ -71,6 +78,79 @@ export default function StreamAssessmentPage({ onBackToStreams, onComplete }) {
   const [timeLeft, setTimeLeft] = useState(15 * 60); // 15 minutes
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [adaptiveNotice, setAdaptiveNotice] = useState(null);
+
+  // Fetch AI-generated assessment from Groq service with graceful fallback
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchAiAssessment() {
+      try {
+        const payload = {
+          employeeId: empId,
+          department: deptDisplay,
+          role: roleTitleDisplay,
+          professionalArea: roleBlueprint?.ministry || 'Official Statistical System & Governance',
+          competencies: blueprintCompetencies,
+          count: 5
+        };
+        const response = await aiAPI.generateAssessment(payload);
+        if (response?.data?.success && response?.data?.assessment) {
+          const aiData = response.data.assessment;
+          if (Array.isArray(aiData.questions) && aiData.questions.length > 0 && isMounted) {
+            const mappedQuestions = aiData.questions.map((q, idx) => {
+              const optArray = Array.isArray(q.options) ? q.options : [];
+              const formattedOptions = optArray.map((opt, oIdx) => {
+                const optLetter = String.fromCharCode(65 + oIdx);
+                if (typeof opt === 'string') {
+                  return { id: optLetter, text: opt };
+                }
+                return { id: opt.id || optLetter, text: opt.text || opt.label || String(opt) };
+              });
+
+              let correctOpt = 'A';
+              if (q.correctAnswer) {
+                const trimmed = String(q.correctAnswer).trim();
+                const matchedByLetter = formattedOptions.find(o => o.id.toUpperCase() === trimmed.toUpperCase());
+                if (matchedByLetter) {
+                  correctOpt = matchedByLetter.id;
+                } else {
+                  const matchedByText = formattedOptions.find(o => o.text.toLowerCase() === trimmed.toLowerCase());
+                  if (matchedByText) {
+                    correctOpt = matchedByText.id;
+                  }
+                }
+              }
+
+              return {
+                id: q.id || `AI-Q${idx + 1}`,
+                question: q.question,
+                options: formattedOptions,
+                correctOption: correctOpt,
+                competencyName: q.competency || 'Role Competency',
+                competencyId: q.competency ? q.competency.toLowerCase().replace(/\s+/g, '-') : 'general',
+                difficulty: (q.difficulty || 'MEDIUM').toUpperCase(),
+                explanation: q.explanation || 'Evaluated by Groq AI Competency Engine',
+                source: response.data.model ? `Groq AI (${response.data.model})` : 'Groq AI Competency Engine'
+              };
+            });
+
+            setQuestions(prev => {
+              // Only override if user hasn't started answering yet
+              if (Object.keys(answers).length === 0 && mappedQuestions.length > 0) {
+                return mappedQuestions;
+              }
+              return prev;
+            });
+          }
+        }
+      } catch (err) {
+        // Fallback already pre-loaded from generateEmployeeAssessment; gracefully log
+        console.log('[Groq AI] Fallback active:', err.message);
+      }
+    }
+
+    fetchAiAssessment();
+    return () => { isMounted = false; };
+  }, [empId]);
 
   // Timer countdown
   useEffect(() => {
@@ -229,14 +309,8 @@ export default function StreamAssessmentPage({ onBackToStreams, onComplete }) {
   };
 
   // Resolve Header Titles
-  const roleTitleDisplay = roleBlueprint?.roleTitle || employee?.designation || 'Statistical Investigator';
-  const deptDisplay = roleBlueprint?.departmentName || employee?.department || 'MoSPI / National Statistical Office';
   const compNameDisplay = currentQ?.competencyName || currentQ?.competency || 'Core Competency';
   const currentDifficulty = currentQ?.difficulty || 'MEDIUM';
-
-  const blueprintCompetencies = roleBlueprint?.competencies?.map(c => c.name) || employee?.competenciesFocus || [
-    'Survey Sampling', 'Statistical Methods', 'Data Analysis', 'Survey Operations', 'Data Quality'
-  ];
 
   // ══════════════════════════════════════════════════════════════════════════
   // STAGE 1: DIAGNOSTIC INTRO SCREEN (STEP 4)

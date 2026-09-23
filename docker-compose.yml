@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: karmasiksha-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: karmasiksha
+      POSTGRES_PASSWORD: karmasiksha_pass
+      POSTGRES_DB: karmasiksha
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U karmasiksha -d karmasiksha"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: karmasiksha-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://karmasiksha:karmasiksha_pass@db:5432/karmasiksha
+      ASYNC_DATABASE_URL: postgresql+asyncpg://karmasiksha:karmasiksha_pass@db:5432/karmasiksha
+      SECRET_KEY: karmasiksha-production-super-secret-key-change-in-prod-2026
+      BACKEND_CORS_ORIGINS: '["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000"]'
+      AI_PROVIDER: grounded_deterministic
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: karmasiksha-frontend
+    restart: always
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

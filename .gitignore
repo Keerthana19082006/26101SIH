@@ -4,5 +4,12 @@ server/node_modules/
 client/dist/
 server/dist/
 .env
+*.env
+backend/.env
+server/.env
 .DS_Store
 *.log
+__pycache__/
+*.pyc
+*.db
+uploads/

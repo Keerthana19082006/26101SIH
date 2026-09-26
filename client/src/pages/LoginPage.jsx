@@ -1,14 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, LogIn, ShieldCheck, ExternalLink, AlertCircle, Zap, GraduationCap, Shield } from 'lucide-react';
+import { Eye, EyeOff, LogIn, ShieldCheck, ExternalLink, AlertCircle, Zap, GraduationCap, Shield, ArrowLeft } from 'lucide-react';
 import { authAPI } from '../services/api';
 import { useStream } from '../context/StreamContext';
+import { useLanguage } from '../context/LanguageContext';
 import PreDashboardLayout from '../components/layout/PreDashboardLayout';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
 
 export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
   const { skipToDashboard } = useStream();
+  const { t, isHindi } = useLanguage();
   const [form, setForm] = useState({ credential: '', password: '' });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -82,12 +85,15 @@ export default function LoginPage({ onLogin }) {
               </h1>
               <p className="text-xs text-white/50">Data Informatics & Innovation Division (DIID)</p>
             </div>
-            <div className="ml-auto hidden sm:flex items-center gap-2 border border-white/20 rounded px-3 py-2 bg-white/5">
-              <div className="w-6 h-6 rounded bg-gov-saffron flex items-center justify-center text-white text-[10px] font-bold">iG</div>
-              <div>
-                <p className="text-[11px] font-semibold text-white">iGOT Karmayogi</p>
-                <p className="text-[9px] text-white/40">[Integration Placeholder]</p>
-              </div>
+            <div className="ml-auto flex items-center gap-3">
+              <Link
+                to="/"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
+              >
+                <ArrowLeft size={13} />
+                <span>{isHindi ? 'मुख्य पृष्ठ' : 'Home Page'}</span>
+              </Link>
+              <LanguageSwitcher variant="compact" />
             </div>
           </div>
         </div>

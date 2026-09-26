@@ -24,6 +24,7 @@ import {
 import ProfileErrorBoundary from '../ProfileErrorBoundary';
 import { useStream } from '../../context/StreamContext';
 import { STREAMS } from '../../data/streamData';
+import LanguageSwitcher from '../common/LanguageSwitcher';
 
 export default function GovernmentTopNav({ onLogout, onSwitchPortal, onMobileMenuToggle }) {
   const navigate = useNavigate();
@@ -164,6 +165,8 @@ export default function GovernmentTopNav({ onLogout, onSwitchPortal, onMobileMen
               <span className="w-1.5 h-1.5 rounded-full bg-gov-saffron animate-pulse" />
               <span className="font-semibold text-white">iGOT Karmayogi Integrated</span>
             </div>
+
+            <LanguageSwitcher variant="compact" />
           </div>
         </div>
       </div>

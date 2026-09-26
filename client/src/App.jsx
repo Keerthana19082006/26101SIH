@@ -9,6 +9,7 @@ import AIAssistantDrawer from './components/AIAssistantDrawer';
 import GovernmentFooter from './components/GovernmentFooter';
 
 // Pages
+import LandingPage from './pages/public/LandingPage';
 import LoginPage from './pages/LoginPage';
 import PortalSelectionPage from './pages/PortalSelectionPage';
 import EmployeeSelectionPage from './pages/EmployeeSelectionPage';
@@ -34,6 +35,7 @@ import ProfileErrorBoundary from './components/ProfileErrorBoundary';
 
 // Context
 import { StreamProvider, useStream } from './context/StreamContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 // App shell for authenticated users who have selected an employee profile
 function AppShell({ onLogout, onSwitchPortal }) {
@@ -139,6 +141,28 @@ function AppRoutes() {
     navigate('/portal');
   };
 
+  const handleQuickLandingLogin = (portalId = 'employee') => {
+    setIsLoggedIn(true);
+    localStorage.setItem('ks_is_logged_in', 'true');
+    if (portalId === 'employee') {
+      setActivePortal('employee_selection');
+      localStorage.setItem('ks_active_portal', 'employee_selection');
+      navigate('/employee/select');
+    } else if (portalId === 'trainer') {
+      setActivePortal('trainer');
+      localStorage.setItem('ks_active_portal', 'trainer');
+      navigate('/trainer');
+    } else if (portalId === 'admin') {
+      setActivePortal('admin');
+      localStorage.setItem('ks_active_portal', 'admin');
+      navigate('/admin');
+    } else {
+      setActivePortal('portal_selection');
+      localStorage.setItem('ks_active_portal', 'portal_selection');
+      navigate('/portal');
+    }
+  };
+
   const handlePortalSelect = (portalId) => {
     setIsLoggedIn(true);
     localStorage.setItem('ks_is_logged_in', 'true');
@@ -192,16 +216,14 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-      {/* ── 1. ENTRY / LOGIN GATE ────────────────────────────────────────── */}
+      {/* ── 1. ENTRY / LANDING & LOGIN GATES ────────────────────────────── */}
       <Route
         path="/"
-        element={
-          !isLoggedIn ? (
-            <LoginPage onLogin={handleLogin} />
-          ) : (
-            <Navigate to="/portal" replace />
-          )
-        }
+        element={<LandingPage onQuickLogin={handleQuickLandingLogin} />}
+      />
+      <Route
+        path="/landing"
+        element={<LandingPage onQuickLogin={handleQuickLandingLogin} />}
       />
       <Route
         path="/login"
@@ -379,9 +401,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter>
-      <StreamProvider>
-        <AppRoutes />
-      </StreamProvider>
+      <LanguageProvider>
+        <StreamProvider>
+          <AppRoutes />
+        </StreamProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

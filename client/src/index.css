@@ -64,6 +64,14 @@ body {
   overflow-x: hidden;
 }
 
+body.lang-hindi {
+  font-family: "Noto Sans Devanagari", "Noto Sans", "Segoe UI", Arial, sans-serif;
+}
+
+.font-devanagari {
+  font-family: "Noto Sans Devanagari", "Noto Sans", sans-serif;
+}
+
 /* Prevent document/body level scroll when inside the Employee Portal */
 html.portal-active,
 body.portal-active,

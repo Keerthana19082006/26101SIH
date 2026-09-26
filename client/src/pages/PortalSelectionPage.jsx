@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   UserCheck,
@@ -14,9 +15,13 @@ import {
   FileText,
   BarChart2,
   CheckCircle2,
-  Building2
+  Building2,
+  ArrowLeft,
+  ShieldCheck
 } from 'lucide-react';
 import PreDashboardLayout from '../components/layout/PreDashboardLayout';
+import LanguageSwitcher from '../components/common/LanguageSwitcher';
+import { useLanguage } from '../context/LanguageContext';
 
 const fadeUp = {
   initial: { opacity: 0, y: 16 },
@@ -25,6 +30,7 @@ const fadeUp = {
 };
 
 export default function PortalSelectionPage({ onSelectPortal, onLogout }) {
+  const { isHindi } = useLanguage();
   const portals = [
     {
       id: 'employee',
@@ -62,7 +68,7 @@ export default function PortalSelectionPage({ onSelectPortal, onLogout }) {
       features: [
         { label: 'Course Management', icon: BookOpen },
         { label: 'Learning Materials', icon: FileText },
-        { label: 'AI MCQ Generation', icon: Sparkles },
+        { label: 'Standardized Question Bank', icon: ClipboardCheck },
         { label: 'Question Review', icon: CheckCircle2 },
       ],
       ctaText: 'Continue as Trainer',
@@ -110,10 +116,15 @@ export default function PortalSelectionPage({ onSelectPortal, onLogout }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-[11px] border border-white/15">
-            <span className="w-2 h-2 rounded-full bg-gov-green animate-pulse" />
-            <span className="font-semibold text-white">iGOT Karmayogi Ecosystem</span>
-          </div>
+          <Link
+            to="/"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold text-white/90 bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
+          >
+            <ArrowLeft size={13} />
+            <span>{isHindi ? 'मुख्य पृष्ठ' : 'Home'}</span>
+          </Link>
+
+          <LanguageSwitcher variant="compact" />
 
           {onLogout && (
             <button
@@ -149,7 +160,7 @@ export default function PortalSelectionPage({ onSelectPortal, onLogout }) {
           {/* Header Title Section */}
           <motion.div {...fadeUp} className="text-center space-y-3 max-w-3xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gov-blue-light border border-blue-200 text-gov-blue text-xs font-bold uppercase tracking-wider">
-              <Sparkles size={13} className="text-gov-saffron" />
+              <ShieldCheck size={14} className="text-gov-saffron" />
               <span>KarmaSiksha Platform Gate</span>
             </div>
 

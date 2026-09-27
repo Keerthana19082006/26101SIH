@@ -3,7 +3,9 @@ Write-Host "  KarmaSiksha SIH 26101 - Launching Full Platform (Frontend + Backen
 Write-Host "=========================================================================" -ForegroundColor Cyan
 
 $pyPath = "python"
-if (Test-Path "C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe") {
+if (Test-Path "$PSScriptRoot\backend\venv\Scripts\python.exe") {
+    $pyPath = "$PSScriptRoot\backend\venv\Scripts\python.exe"
+} elseif (Test-Path "C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe") {
     $pyPath = "C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe"
 }
 

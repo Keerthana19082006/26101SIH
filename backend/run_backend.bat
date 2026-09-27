@@ -5,10 +5,12 @@ echo ========================================================
 cd /d "%~dp0"
 
 set "PY_CMD=python"
-if exist "C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe" (
+if exist "%~dp0venv\Scripts\python.exe" (
+    set "PY_CMD=%~dp0venv\Scripts\python.exe"
+) else if exist "C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe" (
     set "PY_CMD=C:\Users\LENOVO\AppData\Local\Programs\Python\Python311\python.exe"
 ) else (
-    where py >nul 2>nul && set "PY_CMD=py -3.11"
+    where py >nul 2>nul && set "PY_CMD=py"
 )
 
 echo Using Python: %PY_CMD%
